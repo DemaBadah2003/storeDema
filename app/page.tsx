@@ -1,7 +1,5 @@
 "use client";
 import Link from "next/link";
-import { products } from "@/lib/data";
-import ProductCard from "@/components/ProductCard";
 
 export default function Home() {
   return (
@@ -41,73 +39,24 @@ export default function Home() {
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-5">
           {[
-            { icon: "👟", name: "أحذية" },
-            { icon: "👕", name: "ملابس" },
-            { icon: "📱", name: "إلكترونيات" },
-            { icon: "🏠", name: "المنزل" },
-            { icon: "⌚", name: "ساعات" },
-            { icon: "👜", name: "حقائب" },
-            { icon: "⚽", name: "رياضة" },
-            { icon: "💄", name: "جمال" },
+            { icon: "👟", name: "أحذية", slug: "shoes" },
+            { icon: "👕", name: "ملابس", slug: "clothes" },
+            { icon: "📱", name: "إلكترونيات", slug: "electronics" },
+            { icon: "🏠", name: "المنزل", slug: "home" },
+            { icon: "⌚", name: "ساعات", slug: "watches" },
+            { icon: "👜", name: "حقائب", slug: "bags" },
+            { icon: "⚽", name: "رياضة", slug: "sports" },
+            { icon: "💄", name: "جمال", slug: "beauty" },
           ].map((cat) => (
             <Link
               key={cat.name}
-              href="/products"
+              href={`/products?category=${cat.slug}`}
               // كلاسات الـ Glassmorphism والتأثير المرتفع مع الحواف الدائرية الأنيقة
               className="bg-white/60 backdrop-blur-md rounded-2xl p-6 text-center border border-white/40 shadow-[0_4px_12px_rgba(0,0,0,0.03)] hover:border-[#b36d39] hover:bg-white/90 hover:shadow-[0_10px_25px_rgba(179,109,57,0.12)] hover:-translate-y-1 transition-all duration-300 group"
             >
               <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300 filter drop-shadow-sm">{cat.icon}</div>
               <p className="text-sm font-bold text-[#5c3e31] group-hover:text-[#b36d39] transition-colors">{cat.name}</p>
             </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* كروت ترويجية مدمجة بالكامل مع الهوية اللونية الفاخرة والجديدة للموقع */}
-      <section className="max-w-6xl mx-auto px-4 pb-14">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
-          {/* كرت التوصيل السريع — ستايل بلوري ناعم */}
-          <div className="bg-white/60 backdrop-blur-md border border-white/50 rounded-2xl p-8 shadow-[0_4px_15px_rgba(0,0,0,0.02)] flex flex-col justify-between items-start text-right">
-            <div>
-              <h3 className="font-extrabold text-xl text-[#5c3e31] mb-2">توصيل سريع ومضمون ⚡</h3>
-              <p className="text-sm text-[#8a6d5f] mb-8 font-medium">اشترك الآن في العضوية المميزة واحصل على توصيل مجاني فوراً</p>
-            </div>
-            <button className="bg-gradient-to-r from-[#d48c56] to-[#b36d39] text-white px-7 py-3 rounded-xl text-sm font-bold hover:from-[#bd7a47] hover:to-[#9e5c2d] transition-all shadow-md hover:shadow-lg">
-              سجل الآن
-            </button>
-          </div>
-
-          {/* كرت عروض اليوم — برتقالي دافئ وذهبي ساحر وعميق */}
-          <div className="bg-gradient-to-br from-[#fcf3eb] to-[#f5dfd2] border border-[#e8c8b5] rounded-2xl p-8 shadow-[0_4px_15px_rgba(179,109,57,0.05)] flex flex-col justify-between items-start text-right">
-            <div>
-              <h3 className="font-extrabold text-xl text-[#b36d39] mb-2">عروض اليوم الحصرية 🔥</h3>
-              <p className="text-sm text-[#7a5a4a] mb-8 font-medium">خصومات وتنزيلات كبرى لفترة محدودة جداً تصل حتى 70%</p>
-            </div>
-            <Link
-              href="/products"
-              className="bg-gradient-to-r from-[#b36d39] to-[#8c4f22] text-white px-7 py-3 rounded-xl text-sm font-bold inline-block hover:from-[#9e5c2d] hover:to-[#733e17] transition-all shadow-md hover:shadow-lg"
-            >
-              اكتشف العروض
-            </Link>
-          </div>
-
-        </div>
-      </section>
-
-      {/* المنتجات الأكثر مبيعاً */}
-      <section className="max-w-6xl mx-auto px-4 pb-20">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-xl font-bold text-[#5c3e31] border-r-4 border-[#b36d39] pr-3">
-            الأكثر مبيعاً
-          </h2>
-          <Link href="/products" className="text-[#b36d39] text-sm font-bold hover:underline hover:text-[#8c4f22] transition-colors">
-            عرض الكل ←
-          </Link>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       </section>
