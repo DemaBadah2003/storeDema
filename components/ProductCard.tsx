@@ -38,12 +38,7 @@ export default function ProductCard({ product }: { product: Product }) {
           >
             أضف للسلة
           </button>
-          <Link
-            href={`/products/${product.id}`}
-            className="block w-full mt-3 text-center text-xs font-bold text-[#8a6d5f] hover:text-[#b36d39] hover:underline transition-colors"
-          >
-            عرض التفاصيل
-          </Link>
+          
         </div>
       </div>
     </div>

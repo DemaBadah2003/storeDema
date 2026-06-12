@@ -1,82 +1,74 @@
 "use client";
+import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { useCartStore } from "@/lib/store";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import DataTable from "@/app/(auth)/register/components/DataTable";
+export default function OrdersPage() {
+  const [search, setSearch] = useState("");
+  const { orders } = useCartStore();
 
-type ReportView = null | "business-credit" | "allOrders";
+  const filteredOrders = orders.filter(order => 
+    order.id.includes(search)
+  );
 
-export default function OrdersReportPage() {
-  const router = useRouter();
-  const [showPopup, setShowPopup] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false);
-
-  // ───────────── الصفحة الرئيسية ─────────────
   return (
-    <>
-      <div className="p-8 bg-white min-h-screen" dir="rtl">
-        <header className="mb-6">
-          <h1 className="text-3xl font-medium text-gray-900 mb-6">طلباتك</h1>
-          
-          {/* شريط البحث */}
-          <div className="flex gap-2 mb-6">
-            <input 
-              type="text" 
-              placeholder="البحث عن عنصر أو رقم طلب..." 
-              className="border border-gray-400 rounded px-4 py-2 w-full max-w-md focus:outline-none" 
-            />
-            <button className="bg-gray-200 border border-gray-400 px-4 py-2 rounded text-sm font-semibold hover:bg-gray-300">
-              البحث عن الطلبات
-            </button>
-          </div>
+    <div className="p-6 max-w-5xl mx-auto" dir="rtl">
+      <div className="bg-white border border-gray-200 overflow-hidden">
+        <div className="flex items-center gap-6 p-6 border-b border-gray-200">
+          <h1 className="text-2xl font-bold text-gray-800">طلباتي</h1>
+          <input
+            type="text"
+            placeholder="بحث برقم الطلب..."
+            className="px-4 py-2 border border-gray-300 rounded-lg w-72 focus:ring-1 focus:ring-gray-400 outline-none"
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
 
-          {/* التابات العلوية */}
-          <div className="flex gap-8 border-b border-gray-300 mb-6 text-sm">
-            <span className="border-b-2 border-orange-500 pb-2 font-medium">الطلبات</span>
-          </div>
-        </header>
-
-        {/* منطقة الفلترة مع القوائم المنسدلة */}
-        <section className="flex items-center gap-4 mb-6">
-          <span className="text-sm">عرض 0 طلبات في</span>
-          
-          <select className="border border-gray-400 rounded px-2 py-1 text-sm bg-gray-50 focus:outline-none">
-            <option>كل الطلبات</option>
-            <option>كل الطلبات : اسم شركتك</option>
-            <option>طلباتك : مدفوعة بواسطة شركتك</option>
-            <option>طلباتك : مدفوعة بواسطتك</option>
-          </select>
-
-          <select className="border border-gray-400 rounded px-2 py-1 text-sm bg-gray-50 focus:outline-none">
-            <option>آخر 3 أشهر</option>
-            <option>آخر 30 يوم</option>
-            <option>عام 2026</option>
-          </select>
-
-          {/* التعديل هنا: عند الضغط يتم الانتقال للمسار المحدد */}
-          <button 
-            onClick={() => router.push("/orders/report")} 
-            className="mr-auto text-blue-700 hover:underline text-sm cursor-pointer"
-          >
-            عرض تقارير الطلبات
-          </button>
-        </section>
-
-        <p className="mb-6 text-sm">لم تقم بإجراء أي طلبات في آخر 3 أشهر. <span className="text-blue-700 underline cursor-pointer">عرض الطلبات في عام 2026.</span></p>
-
-        {/* كارد المنتج */}
-        <section className="border border-gray-300 rounded-lg p-4 flex gap-4 items-center shadow-sm">
-          <div className="w-24 h-24 bg-gray-100 flex items-center justify-center border text-xs text-gray-400">صورة</div>
-          <div>
-            <h3 className="text-blue-700 hover:underline cursor-pointer font-medium">TOLEAD Low Bunk Bed with Slide, Floor Loft Be...</h3>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <span className="text-orange-500">★★★★☆</span> 295
-            </div>
-          </div>
-          <div className="mr-auto text-lg font-bold">189.99$</div>
-        </section>
-        <div className="text-xs text-gray-500 mt-2">إعلان ⓘ</div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-right border-collapse">
+            <thead>
+              <tr className="bg-white border-b border-gray-200">
+                <th className="p-4 border-l border-gray-200 text-gray-700">رقم الطلب</th>
+                <th className="p-4 border-l border-gray-200 text-gray-700">المنتجات</th>
+                <th className="p-4 border-l border-gray-200 text-gray-700">التاريخ</th>
+                <th className="p-4 border-l border-gray-200 text-gray-700">الحالة</th>
+                <th className="p-4 border-l border-gray-200 text-gray-700">الإجمالي</th>
+                <th className="p-4 text-center text-gray-700">الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredOrders.map((order) => (
+                <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50 transition">
+                  <td className="p-4 border-l border-gray-100 font-bold text-gray-900">#{order.id}</td>
+                  <td className="p-4 border-l border-gray-100">
+                    {order.items.map((item, idx) => (
+                      <div key={idx} className="flex items-center gap-2 mb-1">
+                        <div className="w-10 h-10 rounded overflow-hidden border">
+                           <Image src={item.product.image} alt={item.product.nameAr} width={40} height={40} className="object-cover"/>
+                        </div>
+                        <span className="text-xs">{item.product.nameAr} (×{item.quantity})</span>
+                      </div>
+                    ))}
+                  </td>
+                  <td className="p-4 border-l border-gray-100 text-gray-600">{order.date}</td>
+                  <td className="p-4 border-l border-gray-100">
+                    <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-orange-50 text-orange-600 border border-orange-100">
+                      {order.status}
+                    </span>
+                  </td>
+                  <td className="p-4 border-l border-gray-100 font-bold text-gray-800">{order.total.toFixed(2)}₪</td>
+                  <td className="p-4 text-center">
+                    <Link href={`/orders/${order.id}`} className="text-gray-900 font-semibold underline hover:text-[#D4900A]">
+                      عرض التفاصيل
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </>
+    </div>
   );
 }
