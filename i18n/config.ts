@@ -25,7 +25,7 @@ i18next.use(initReactI18next).init({
         
         // Categories Keys
         all: "الكل",
-        home_page: "الأحذية",
+        shoes: "الأحذية",
         electronics: "الإلكترونيات",
         beauty: "الجمال والصحة",
         clothes: "الملابس",

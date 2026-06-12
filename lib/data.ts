@@ -18,7 +18,7 @@ export const products: Product[] = [
   { id: "14", name: 'Paper File', nameAr: 'ملف ورق', price: 3.49, image: '/paper.jpg', category: 'أدوات مكتبية', categorySlug: 'office', stock: 55 },
   { id: "15", name: 'Wooden Door', nameAr: 'باب خشبي', price: 189.99, image: '/door.jpg', category: 'المنزل', categorySlug: 'home', stock: 5 },
   { id: "16", name: 'Laptop', nameAr: 'لابتوب', price: 899.99, image: '/laptop.jpg', category: 'إلكترونيات', categorySlug: 'electronics', stock: 8 },
-  { id: "17", name: 'Running Shoes', nameAr: 'حذاء رياضي', price: 59.99, image: '/twind', category: 'أحذية', categorySlug: 'shoes', stock: 25 },
+  { id: "17", name: 'Running Shoes', nameAr: 'حذاء رياضي', price: 59.99, image: '/shoes.jpg', category: 'أحذية', categorySlug: 'shoes', stock: 25 },
   { id: "18", name: 'T-Shirt', nameAr: 'تيشيرت', price: 14.99, image: '/t-shirt.jpg', category: 'ملابس', categorySlug: 'clothes', stock: 60 },
   { id: "19", name: 'Handbag', nameAr: 'حقيبة يد', price: 39.99, image: '/bag.jpg', category: 'حقائب', categorySlug: 'bags', stock: 18 },
   { id: "20", name: 'Wall Clock', nameAr: 'ساعة حائط', price: 22.99, image: '/oclock.jpg', category: 'ساعات', categorySlug: 'watches', stock: 14 },
