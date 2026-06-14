@@ -1,11 +1,10 @@
-"use client"; // ضروري لاستخدام hooks مثل useSearchParams
+"use client";
 
-import { Suspense } from "react";
+import { useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { products } from "@/lib/data"; // تأكدي من مسار الاستيراد الصحيح
-import ProductCard from "@/components/ProductCard"; // تأكدي من مسار الاستيراد الصحيح
+import { products } from "@/lib/data"; 
+import ProductCard from "@/components/ProductCard";
 
-// 1. المكون الداخلي الذي يستخدم الـ Hooks
 function ProductList() {
   const searchParams = useSearchParams();
   const category = searchParams.get("category");
@@ -23,13 +22,18 @@ function ProductList() {
   );
 }
 
-// 2. هذا هو الـ Default Export الذي يبحث عنه Next.js
 export default function ProductsPage() {
+  // تخزين المنتجات في localStorage عند تحميل الصفحة
+  useEffect(() => {
+    if (products && products.length > 0) {
+      localStorage.setItem("products", JSON.stringify(products));
+    }
+  }, []); // [] تعني أن هذا الكود سيعمل مرة واحدة فقط عند تحميل الصفحة
+
   return (
     <main className="max-w-6xl mx-auto px-4 py-10 min-h-screen">
       <h1 className="text-2xl font-bold text-[#5c3e31] mb-8">استعراض المنتجات</h1>
       
-      {/* الـ Suspense مطلوب عند استخدام useSearchParams */}
       <Suspense fallback={<p>جاري تحميل المنتجات...</p>}>
         <ProductList />
       </Suspense>
