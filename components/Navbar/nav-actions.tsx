@@ -19,7 +19,7 @@ export default function NavActions() {
       <Divider />
 
       <Link
-        href="/login"
+        href="/signin"
         className="flex flex-col justify-center hover:border hover:border-white rounded px-3 py-1 min-w-fit transition"
       >
         <span className="text-[#8a6d5f] text-[11px] font-medium text-right">
@@ -33,7 +33,7 @@ export default function NavActions() {
       <Divider />
 
       <Link
-        href="/register"
+        href="/signup"
         className="flex flex-col justify-center hover:border hover:border-white rounded px-3 py-1 min-w-fit transition"
       >
         <span className="text-[#8a6d5f] text-[11px] font-medium text-right">

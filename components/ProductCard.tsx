@@ -28,7 +28,7 @@ export default function ProductCard({ product }: { product: Product }) {
   return (
     <div className="bg-white/70 backdrop-blur-sm rounded-2xl border border-white/50 overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_12px_24px_rgba(179,109,57,0.1)] hover:border-[#b36d39]/40 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
       
-      {/* صورة المنتج */}
+      {/* صورة المنتج — قابلة للضغط */}
       <Link href={`/products/${product.id}`}>
         <div className="bg-gradient-to-b from-[#fbf5f1] to-[#f5e4da]/40 h-44 relative overflow-hidden group cursor-pointer">
           <Image

@@ -1,0 +1,115 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// 👇 حالة المستخدم (مطلوبة في auth-options.ts)
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+}
+
+// جدول المستخدمين
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  phone     String?
+  orders    Order[]  // علاقة المستخدم بطلباته
+
+  // 👇 الإضافة الجديدة: ربط المستخدم بدوره
+  roleId    String
+  role      UserRole @relation(fields: [roleId], references: [id])
+
+  // 👇 الحقول الناقصة المطلوبة لملف auth-options.ts
+  status          UserStatus @default(ACTIVE)
+  isTrashed       Boolean    @default(false)
+  avatar          String?
+  emailVerifiedAt DateTime?
+  lastSignInAt    DateTime?
+
+  @@index([roleId])
+}
+
+// جدول المنتجات
+model Product {
+  id          String      @id @default(uuid())
+  name        String
+  price       Decimal
+  imageUrl    String      // نخزن رابط الصورة فقط
+  stock       Int         @default(0)
+  orderItems  OrderItem[] // علاقة المنتج بتفاصيل الطلبات
+}
+model VerificationToken {
+  id         String   @id @default(cuid())
+  identifier String
+  token      String   @unique
+  expires    DateTime
+}
+// جدول الطلبات الأساسي
+model Order {
+  id          String      @id @default(uuid())
+  userId      String
+  user        User        @relation(fields: [userId], references: [id])
+  totalAmount Decimal
+  status      String      @default("جاري التجهيز")
+  createdAt   DateTime    @default(now())
+  items       OrderItem[] // المنتجات الموجودة داخل هذا الطلب
+}
+
+// جدول وسيط لربط المنتجات بالطلبات (مع حفظ السعر وقت الشراء)
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Decimal // السعر لحظة الطلب
+}
+
+// 👇 الجداول الجديدة: نظام الأدوار والصلاحيات (RBAC)
+
+// جدول الأدوار (admin, customer, ...)
+model UserRole {
+  id          String               @id @default(uuid())
+  slug        String               @unique // مثال: "admin", "customer"
+  name        String               @unique // اسم للعرض: "مسؤول", "عميل"
+  description String?
+  isDefault   Boolean              @default(false) // الدور الافتراضي لأي مستخدم جديد
+  createdAt   DateTime             @default(now())
+  users       User[]
+  permissions UserRolePermission[]
+}
+
+// جدول الصلاحيات (إجراءات النظام)
+model UserPermission {
+  id          String               @id @default(uuid())
+  slug        String               @unique // مثال: "manage-products", "view-orders"
+  name        String
+  description String?
+  createdAt   DateTime             @default(now())
+  roles       UserRolePermission[]
+}
+
+// جدول الربط بين الأدوار والصلاحيات (Many-to-Many)
+model UserRolePermission {
+  id           String         @id @default(uuid())
+  roleId       String
+  permissionId String
+  assignedAt   DateTime       @default(now())
+  role         UserRole       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   UserPermission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+}

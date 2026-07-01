@@ -19,7 +19,6 @@ export const metadata: Metadata = {
   title: "متجري الإلكتروني",
   description: "أفضل المنتجات بأفضل الأسعار",
 };
-
 export default function RootLayout({
   children,
 }: Readonly<{
