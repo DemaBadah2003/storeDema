@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
 import { db as prisma } from "@/lib/db";
-import {
-  getSignupSchema,
-  SignupSchemaType,
-} from '@/app/(auth)/forms/signup-schema';
+import { getSignupSchema, SignupSchemaType } from '@/app/(auth)/forms/signup-schema';
 import { UserStatus } from "@/lib/generated/prisma/client";
 export async function POST(req: NextRequest) {
   try {
@@ -48,7 +45,7 @@ export async function POST(req: NextRequest) {
     if (!defaultRole) {
       console.error('❌ [SIGNUP] NO DEFAULT ROLE FOUND IN DATABASE!');
       return NextResponse.json(
-        { message: 'Server setup error: No default role. Contact admin.' },
+        { message: 'خطأ في إعداد الخادم: لا يوجد دور افتراضي. تواصل مع المسؤول.' },
         { status: 500 }
       );
     }
