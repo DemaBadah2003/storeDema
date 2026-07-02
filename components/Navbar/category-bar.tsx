@@ -4,14 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import CategoryDropdown from "./category-dropdown";
-
-const categories = [
-  // قمت بتغيير translationKey لتكون 'home_page' لتطابق ما هو موجود في ملف الترجمة الخاص بكِ
-  { slug: "shoes", translationKey: "shoes", items: ["sports"] },
-  { slug: "electronics", translationKey: "electronics", items: ["electronics"] },
-  { slug: "beauty", translationKey: "beauty", items: ["beauty"] },
-  { slug: "clothes", translationKey: "clothes", items: ["clothes"] },
-];
+import { categories } from "./config";
 
 export default function CategoryBar() {
   const { t } = useTranslation();
@@ -26,7 +19,7 @@ export default function CategoryBar() {
           {t("all")}
         </Link>
 
-        {/* قائمة الفئات */}
+        {/* قائمة الفئات الثمانية */}
         {categories.map((cat) => (
           <div
             key={cat.slug}
@@ -34,18 +27,24 @@ export default function CategoryBar() {
             onMouseEnter={() => setOpenCat(cat.slug)}
             onMouseLeave={() => setOpenCat(null)}
           >
-            {/* رابط التنقل الصحيح لصفحة المنتجات مع الفلترة */}
             <Link 
               href={`/products?category=${cat.slug}`}
               className="text-[#5c3e31] text-sm px-3 py-1 hover:bg-white/50 rounded-lg flex items-center gap-1 font-bold transition"
             >
-              {/* هنا سيتم عرض كلمة "الأحذية" لأننا استخدمنا مفتاح home_page */}
-              {t(cat.translationKey)}
+              <span>{cat.icon}</span>
+              {t(cat.slug, cat.name)}
               <span className="text-[10px] text-[#8a6d5f]">▾</span>
             </Link>
 
-            {/* القائمة المنسدلة تظهر عند تمرير الماوس */}
-            {openCat === cat.slug && <CategoryDropdown category={cat} />}
+            {openCat === cat.slug && (
+              <CategoryDropdown
+                category={{
+                  slug: cat.slug,
+                  translationKey: cat.slug,
+                  items: cat.items,
+                }}
+              />
+            )}
           </div>
         ))}
       </div>

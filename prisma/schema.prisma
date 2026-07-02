@@ -43,12 +43,18 @@ model User {
 
 // جدول المنتجات
 model Product {
-  id          String      @id @default(uuid())
-  name        String
-  price       Decimal
-  imageUrl    String      // نخزن رابط الصورة فقط
-  stock       Int         @default(0)
-  orderItems  OrderItem[] // علاقة المنتج بتفاصيل الطلبات
+  id            String   @id @default(cuid())
+  name          String
+  nameAr        String
+  price         Float
+  category      String
+  categorySlug  String
+  image         String
+  stock         Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+    orderItems    OrderItem[]   // 👈 ضيف السطر ده
+
 }
 model VerificationToken {
   id         String   @id @default(cuid())

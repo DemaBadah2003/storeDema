@@ -6,7 +6,6 @@ const links = [
   { href: "/admin", label: "📊 الإحصائيات" },
   { href: "/admin/products", label: "📦 المنتجات" },
   { href: "/admin/orders", label: "🧾 الطلبات" },
-  { href: "/admin/users", label: "👥 المستخدمون" },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

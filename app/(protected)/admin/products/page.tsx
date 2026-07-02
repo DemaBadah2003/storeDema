@@ -1,6 +1,5 @@
 "use client";
-import { useState } from "react";
-import { products as initialProducts } from "@/lib/data";
+import { useState, useEffect } from "react";
 import { Product } from "@/types";
 
 const emptyForm = {
@@ -9,11 +8,32 @@ const emptyForm = {
 };
 
 export default function AdminProducts() {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [form, setForm] = useState(emptyForm);
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/protected/admin/products");
+      if (!res.ok) throw new Error("فشل في جلب المنتجات");
+      const data = await res.json();
+      setProducts(data);
+    } catch (error) {
+      alert("حدث خطأ أثناء جلب المنتجات");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filtered = products.filter((p) =>
     p.nameAr.includes(search) || p.category.includes(search)
@@ -40,38 +60,75 @@ export default function AdminProducts() {
     setShowModal(true);
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm("هل أنت متأكد من حذف المنتج؟")) {
+  const handleDelete = async (id: string) => {
+    if (!confirm("هل أنت متأكد من حذف المنتج؟")) return;
+
+    try {
+      // 👈 الحذف عبر query string حسب route.ts في app/api/protected/admin/products/route.ts
+      const res = await fetch(`/api/protected/admin/products?id=${id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("فشل الحذف");
+
       setProducts((prev) => prev.filter((p) => p.id !== id));
+    } catch (error) {
+      alert("حدث خطأ أثناء حذف المنتج");
+      console.error(error);
     }
   };
 
-  const handleSave = () => {
-    if (!form.nameAr || !form.price) return alert("يرجى تعبئة جميع الحقول");
-
-    if (editingProduct) {
-      setProducts((prev) =>
-        prev.map((p) =>
-          p.id === editingProduct.id
-            ? { ...p, ...form, price: Number(form.price), stock: Number(form.stock) }
-            : p
-        )
-      );
-    } else {
-      const newProduct: Product = {
-        id: String(Date.now()),
-        name: form.name,
-        nameAr: form.nameAr,
-        price: Number(form.price),
-        category: form.category,
-        categorySlug: form.categorySlug,
-        image: form.image || "/placeholder.jpg",
-        stock: Number(form.stock),
-      };
-      setProducts((prev) => [newProduct, ...prev]);
+  const handleSave = async () => {
+    if (!form.nameAr || !form.price) {
+      alert("يرجى تعبئة جميع الحقول المطلوبة");
+      return;
     }
-    setShowModal(false);
+
+    setSaving(true);
+    try {
+      if (editingProduct) {
+        // 👈 تعديل منتج موجود عبر app/api/protected/admin/products/[id]/route.ts (PUT)
+        const res = await fetch(
+          `/api/protected/admin/products/${editingProduct.id}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(form),
+          }
+        );
+        if (!res.ok) throw new Error("فشل التعديل");
+
+        const updated = await res.json();
+        setProducts((prev) =>
+          prev.map((p) => (p.id === editingProduct.id ? updated : p))
+        );
+      } else {
+        // 👈 إضافة منتج جديد عبر app/api/protected/admin/products/[id]/route.ts (POST)
+        const res = await fetch(`/api/protected/admin/products/new`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        });
+        if (!res.ok) throw new Error("فشل الإضافة");
+
+        const created = await res.json();
+        setProducts((prev) => [created, ...prev]);
+      }
+      setShowModal(false);
+    } catch (error) {
+      alert("حدث خطأ أثناء حفظ المنتج");
+      console.error(error);
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64" dir="rtl">
+        <p className="text-[#5c3e31] font-bold">جاري تحميل المنتجات...</p>
+      </div>
+    );
+  }
 
   return (
     <div dir="rtl">
@@ -240,12 +297,18 @@ export default function AdminProducts() {
               <div className="flex gap-3 mt-2">
                 <button
                   onClick={handleSave}
-                  className="flex-1 bg-[#b36d39] text-white font-bold py-3 rounded-xl hover:bg-[#9a5c2e] transition"
+                  disabled={saving}
+                  className="flex-1 bg-[#b36d39] text-white font-bold py-3 rounded-xl hover:bg-[#9a5c2e] transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {editingProduct ? "حفظ التعديلات" : "إضافة المنتج"}
+                  {saving
+                    ? "جاري الحفظ..."
+                    : editingProduct
+                    ? "حفظ التعديلات"
+                    : "إضافة المنتج"}
                 </button>
                 <button
                   onClick={() => setShowModal(false)}
+                  disabled={saving}
                   className="flex-1 border border-gray-200 text-gray-500 font-bold py-3 rounded-xl hover:bg-gray-50 transition"
                 >
                   إلغاء

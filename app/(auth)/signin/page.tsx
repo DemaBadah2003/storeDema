@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff } from 'lucide-react';
-import { signIn } from 'next-auth/react';
+import { signIn, getSession } from 'next-auth/react';
 import { useForm } from 'react-hook-form';
 import { getSigninSchema, SigninSchemaType } from '../forms/signin-schema';
 
@@ -47,9 +47,20 @@ export default function Page() {
         } catch {
           setError('بريد إلكتروني أو كلمة مرور غير صحيحة');
         }
-      } else {
-        router.push('/dashboard');
+        return;
       }
+
+      // نجح تسجيل الدخول - نجيب السيشن عشان نعرف دور المستخدم
+      const session = await getSession();
+      const roleSlug = (session?.user as any)?.roleSlug;
+
+      if (roleSlug === 'admin') {
+        router.push('/admin');
+      } else {
+        router.push('/user');
+      }
+
+      router.refresh();
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.',

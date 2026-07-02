@@ -1,26 +1,17 @@
 export interface Category {
   name: string;
   slug: string;
-  items: string[];
+  icon: string;
+  items?: string[];
 }
 
 export const categories: Category[] = [
-  {
-    name: "الأحذية", slug: "shoes",
-    items: ["أحذية رياضية (Sneakers)", "أحذية كلاسيكية ورسمية", "أحذية خفيفة (Loafers / Slides)"],
-  },
-  {
-    name: "الإلكترونيات", slug: "electronics",
-    items: ["الهواتف الذكية وإكسسواراتها", "الحواسب ومستلزمات الغيمنق", "الأجهزة المنزلية الذكية"],
-  },
-  {
-    name: "الجمال والصحة", slug: "beauty",
-    items: ["العناية بالبشرة والشعر", "المكياج وأدوات التجميل", "العطور والروائح الفاخرة"],
-  },
-  {
-    name: "الملابس", slug: "fashion",
-    items: ["ملابس رياضية (Activewear)", "ملابس كاجوال يومية", "أزياء المناسبات والرسمية"],
-  },
+  { name: "الأحذية", slug: "shoes", icon: "👟" },
+  { name: "الملابس", slug: "clothes", icon: "👕" },
+  { name: "الإلكترونيات", slug: "electronics", icon: "📱" },
+  { name: "المنزل", slug: "home", icon: "🏠" },
+  { name: "ساعات", slug: "watches", icon: "⌚" },
+  { name: "حقائب", slug: "bags", icon: "👜" },
+  { name: "رياضة", slug: "sports", icon: "⚽" },
+  { name: "الجمال والصحة", slug: "beauty", icon: "💄" },
 ];
-
-export const staticLinks = ["عروض اليوم", "الرياضة", "المنزل"];

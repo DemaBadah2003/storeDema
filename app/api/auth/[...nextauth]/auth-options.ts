@@ -3,10 +3,7 @@ import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { db as prisma } from "@/lib/db";
-
-// التعديل هنا: الاستيراد من المسار المخصص المولد لديكِ بدلاً من @prisma/client
 import { UserStatus } from "@/lib/generated/prisma/client";
-
 
 function parseRememberMe(raw: unknown): boolean {
   return raw === true || raw === "true" || raw === "on" || raw === "1";
@@ -34,7 +31,7 @@ export const authOptions: NextAuthOptions = {
             JSON.stringify({
               code: 400,
               message: "يرجى إدخال البريد الإلكتروني وكلمة المرور.",
-            }),
+            })
           );
         }
 
@@ -50,13 +47,13 @@ export const authOptions: NextAuthOptions = {
             JSON.stringify({
               code: 404,
               message: "المستخدم غير موجود. نرجو التسجيل أولًا.",
-            }),
+            })
           );
         }
 
         const isPasswordValid = await bcrypt.compare(
           credentials.password,
-          user.password ?? "",
+          user.password ?? ""
         );
 
         if (!isPasswordValid) {
@@ -64,7 +61,7 @@ export const authOptions: NextAuthOptions = {
             JSON.stringify({
               code: 401,
               message: "بيانات الدخول غير صحيحة.",
-            }),
+            })
           );
         }
 
@@ -73,7 +70,7 @@ export const authOptions: NextAuthOptions = {
             JSON.stringify({
               code: 403,
               message: "هذا الحساب غير متاح.",
-            }),
+            })
           );
         }
 
@@ -82,7 +79,7 @@ export const authOptions: NextAuthOptions = {
             JSON.stringify({
               code: 403,
               message: "تم حظر هذا الحساب. تواصل مع الإدارة.",
-            }),
+            })
           );
         }
 
@@ -102,7 +99,7 @@ export const authOptions: NextAuthOptions = {
           avatar: user.avatar,
           emailVerifiedAt: user.emailVerifiedAt?.toISOString() ?? null,
           rememberMe,
-        } as any;
+        };
       },
     }),
   ],
@@ -114,36 +111,30 @@ export const authOptions: NextAuthOptions = {
 
   callbacks: {
     async jwt({ token, user, trigger, session }) {
-      // تحديث البيانات في الجلسة عند الطلب
-      if (trigger === "update" && session?.user && typeof session.user === "object") {
+      // تحديث البيانات عند الطلب
+      if (
+        trigger === "update" &&
+        session?.user &&
+        typeof session.user === "object"
+      ) {
         const s = session.user as Record<string, unknown>;
-        if (typeof s.avatar === "string") {
-          (token as any).avatar = s.avatar;
-        }
-        if (typeof s.name === "string") {
-          (token as any).name = s.name;
-        }
+        if (typeof s.avatar === "string") token.avatar = s.avatar;
+        if (typeof s.name === "string") token.name = s.name;
       }
 
-      // إضافة بيانات المستخدم للـ Token
+      // إضافة بيانات المستخدم للـ Token أول مرة
       if (user) {
-        // التحويل الآمن لتجنب أخطاء TypeScript
-        const u = user as unknown as Record<string, any>;
-        
-        token.id = (u.id as string) ?? token.sub;
-        (token as any).roleId = u.roleId;
-        (token as any).roleName = u.roleName;
-        (token as any).roleSlug = u.roleSlug;
-        (token as any).status = u.status;
-        (token as any).avatar = u.avatar;
-        (token as any).emailVerifiedAt = u.emailVerifiedAt;
+        token.id = user.id;
+        token.roleId = user.roleId;
+        token.roleName = user.roleName;
+        token.roleSlug = user.roleSlug;
+        token.status = user.status;
+        token.avatar = user.avatar;
+        token.emailVerifiedAt = user.emailVerifiedAt;
 
-        const remember = parseRememberMe(u.rememberMe);
-        (token as any).rememberMe = remember;
-        
-        // تعديل مدة صلاحية الـ Token بناءً على خيار Remember Me
-        const seconds = remember ? 30 * 24 * 60 * 60 : 24 * 60 * 60;
-        token.exp = Math.floor(Date.now() / 1000) + seconds;
+        const remember = parseRememberMe(user.rememberMe);
+        token.rememberMe = remember;
+        token.exp = Math.floor(Date.now() / 1000) + (remember ? 30 * 24 * 60 * 60 : 24 * 60 * 60);
       }
 
       return token;
@@ -151,14 +142,13 @@ export const authOptions: NextAuthOptions = {
 
     async session({ session, token }) {
       if (session.user) {
-        const t = token as Record<string, unknown>;
-        (session.user as any).id = t.id ?? t.sub;
-        (session.user as any).roleId = t.roleId;
-        (session.user as any).roleName = t.roleName;
-        (session.user as any).roleSlug = t.roleSlug;
-        (session.user as any).status = t.status;
-        (session.user as any).avatar = t.avatar;
-        (session.user as any).emailVerifiedAt = t.emailVerifiedAt;
+        session.user.id = token.id;
+        session.user.roleId = token.roleId;
+        session.user.roleName = token.roleName;
+        session.user.roleSlug = token.roleSlug;
+        session.user.status = token.status;
+        session.user.avatar = token.avatar;
+        session.user.emailVerifiedAt = token.emailVerifiedAt;
       }
       return session;
     },

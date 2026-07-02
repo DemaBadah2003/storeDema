@@ -1,6 +1,8 @@
-import { products } from "@/lib/data";
+import { db as prisma } from "@/lib/db";
 
-export default function AdminDashboard() {
+export default async function AdminDashboard() {
+  const products = await prisma.product.findMany();
+
   const totalProducts = products.length;
   const totalStock = products.reduce((sum, p) => sum + p.stock, 0);
   const totalValue = products.reduce((sum, p) => sum + p.price * p.stock, 0);

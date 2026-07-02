@@ -1,7 +1,7 @@
-// lib/data.ts
-import { Product } from '@/types';
+// prisma/seed.ts
+import { db as prisma } from "../lib/db";
 
-export const products: Product[] = [
+const products = [
   { id: "1", name: 'Wireless Headset', nameAr: 'سماعات لاسلكية', price: 29.99, image: '/headset.jpg', category: 'إلكترونيات', categorySlug: 'electronics', stock: 15 },
   { id: "2", name: 'Colored Markers', nameAr: 'ماركرات ملونة', price: 7.99, image: '/markers.jpg', category: 'أدوات مكتبية', categorySlug: 'office', stock: 50 },
   { id: "3", name: 'Pencils Set', nameAr: 'أقلام رصاص', price: 4.99, image: '/pencils.jpg', category: 'أدوات مكتبية', categorySlug: 'office', stock: 80 },
@@ -26,3 +26,27 @@ export const products: Product[] = [
   { id: "22", name: 'Makeup Set', nameAr: 'طقم مكياج', price: 34.99, image: '/makup.jpg', category: 'جمال', categorySlug: 'beauty', stock: 22 },
   { id: "23", name: 'House Decoration', nameAr: 'ديكور منزلي', price: 27.99, image: '/house.jpg', category: 'المنزل', categorySlug: 'home', stock: 16 },
 ];
+
+async function main() {
+  console.log("🌱 بدء إضافة المنتجات...");
+
+  for (const product of products) {
+    await prisma.product.upsert({
+      where: { id: product.id },
+      update: product,
+      create: product,
+    });
+    console.log(`✅ تمت إضافة/تحديث: ${product.nameAr}`);
+  }
+
+  console.log("🎉 تم الانتهاء من إضافة كل المنتجات!");
+}
+
+main()
+  .catch((e) => {
+    console.error("❌ حدث خطأ:", e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

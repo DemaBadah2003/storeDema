@@ -9,9 +9,9 @@ i18next.use(initReactI18next).init({
       translation: {
         // Navbar Actions
         deliver_to: "التوصيل إلى",
-        palestine: "فلسطين", // 👈 إضافة ترجمة فلسطين
-        cart: "السلة",        // 👈 إضافة ترجمة السلة
-        cart_items: "عناصر",  // 👈 إضافة كلمة عناصر للسلة في حال الحاجة لها
+        palestine: "فلسطين",
+        cart: "السلة",
+        cart_items: "عناصر",
         language: "اللغة",
         hello_login: "مرحباً، سجّل الدخول",
         my_account: "حسابي",
@@ -22,7 +22,7 @@ i18next.use(initReactI18next).init({
         wishlist_list: "قائمة",
         wishlist: "المفضلة",
         search_placeholder: "ابحث عن منتجات، ماركات وأكثر...",
-        
+
         // Categories Keys
         all: "الكل",
         shoes: "الأحذية",
@@ -32,15 +32,17 @@ i18next.use(initReactI18next).init({
         deals: "عروض اليوم",
         sports: "الرياضة",
         home: "المنزل",
+        watches: "ساعات",   // 👈 مضافة
+        bags: "حقائب",      // 👈 مضافة
       },
     },
     en: {
       translation: {
         // Navbar Actions
         deliver_to: "Deliver to",
-        palestine: "Palestine", // 👈 إضافة ترجمة فلسطين
-        cart: "Cart",          // 👈 إضافة ترجمة السلة
-        cart_items: "items",   // 👈 إضافة كلمة عناصر بالإنجليزية
+        palestine: "Palestine",
+        cart: "Cart",
+        cart_items: "items",
         language: "Language",
         hello_login: "Hello, sign in",
         my_account: "Account",
@@ -51,16 +53,18 @@ i18next.use(initReactI18next).init({
         wishlist_list: "Wish",
         wishlist: "List",
         search_placeholder: "Search for products, brands and more...",
-        
+
         // Categories Keys
         all: "All",
-        home_page: "Shoes",
+        shoes: "Shoes",       // 👈 صححت الاسم (كان home_page غلط)
         electronics: "Electronics",
         beauty: "Beauty & Health",
         clothes: "Clothes",
         deals: "Today's Deals",
         sports: "Sports",
         home: "Home",
+        watches: "Watches",   // 👈 مضافة
+        bags: "Bags",         // 👈 مضافة
       },
     },
   },

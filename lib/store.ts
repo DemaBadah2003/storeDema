@@ -7,26 +7,17 @@ interface CartItem {
   quantity: number;
 }
 
-interface Order {
-  id: string;
-  date: string;
-  status: string;
-  items: CartItem[];
-  total: number;
-}
-
 interface CartStore {
   cart: CartItem[];
-  orders: Order[];
   searchQuery: string;
   selectedCategory: string;
-  
+
   count: () => number;
   addItem: (product: Product) => void;
   removeItem: (id: string) => void;
   changeQty: (id: string, delta: number) => void;
-  placeOrder: () => void;
-  
+  clearCart: () => void;
+
   setSearchQuery: (query: string) => void;
   setSelectedCategory: (category: string) => void;
 }
@@ -35,7 +26,6 @@ export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       cart: [],
-      orders: [],
       searchQuery: "",
       selectedCategory: "الكل",
 
@@ -70,24 +60,10 @@ export const useCartStore = create<CartStore>()(
         )
       })),
 
-      placeOrder: () => set((state) => {
-        const total = state.cart.reduce(
-          (sum, item) => sum + (item.product.price * item.quantity),
-          0
-        );
-        const newOrder: Order = {
-          id: Math.floor(10000 + Math.random() * 90000).toString(),
-          date: new Date().toLocaleDateString('ar-PS'),
-          status: "جاري التجهيز",
-          items: [...state.cart],
-          total,
-        };
-        return {
-          orders: [...state.orders, newOrder],
-          cart: []
-        };
-      })
+      // تفرغ السلة بعد تأكيد الطلب عبر الباك
+      clearCart: () => set({ cart: [] }),
     }),
-    { name: 'cart-storage' }
+    { name: 'cart-storage', version: 1 }
+
   )
 );
