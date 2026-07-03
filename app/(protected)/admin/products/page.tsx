@@ -11,7 +11,8 @@ export default function AdminProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState(""); // ما يكتبه المستخدم بالحقل
+  const [search, setSearch] = useState(""); // البحث المُطبَّق فعلياً بعد الضغط على الزر
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [form, setForm] = useState(emptyForm);
@@ -33,6 +34,11 @@ export default function AdminProducts() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // 🔍 تشغيل البحث فعلياً (بدل الفلترة اللحظية مع كل حرف)
+  const runSearch = () => {
+    setSearch(searchInput.trim());
   };
 
   const filtered = products.filter((p) =>
@@ -139,10 +145,19 @@ export default function AdminProducts() {
           <input
             type="text"
             placeholder="🔍 ابحث باسم المنتج أو الفئة..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") runSearch();
+            }}
             className="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-[#b36d39] bg-white w-64"
           />
+          <button
+            onClick={runSearch}
+            className="bg-[#b36d39] text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-[#9a5c2e] transition"
+          >
+            بحث
+          </button>
         </div>
         <button
           onClick={openAdd}

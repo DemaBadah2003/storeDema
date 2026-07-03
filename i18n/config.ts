@@ -17,8 +17,7 @@ i18next.use(initReactI18next).init({
         my_account: "حسابي",
         new: "جديد؟",
         create_account: "إنشاء حساب",
-        returns: "الإرجاع",
-        orders: "والطلبات",
+        account_management: "إدارة حسابي", // 👈 بدل returns + orders
         wishlist_list: "قائمة",
         wishlist: "المفضلة",
         search_placeholder: "ابحث عن منتجات، ماركات وأكثر...",
@@ -32,8 +31,8 @@ i18next.use(initReactI18next).init({
         deals: "عروض اليوم",
         sports: "الرياضة",
         home: "المنزل",
-        watches: "ساعات",   // 👈 مضافة
-        bags: "حقائب",      // 👈 مضافة
+        watches: "ساعات",
+        bags: "حقائب",
       },
     },
     en: {
@@ -48,23 +47,22 @@ i18next.use(initReactI18next).init({
         my_account: "Account",
         new: "New?",
         create_account: "Create account",
-        returns: "Returns",
-        orders: "& Orders",
+        account_management: "Account Management", // 👈 بدل returns + orders
         wishlist_list: "Wish",
         wishlist: "List",
         search_placeholder: "Search for products, brands and more...",
 
         // Categories Keys
         all: "All",
-        shoes: "Shoes",       // 👈 صححت الاسم (كان home_page غلط)
+        shoes: "Shoes",
         electronics: "Electronics",
         beauty: "Beauty & Health",
         clothes: "Clothes",
         deals: "Today's Deals",
         sports: "Sports",
         home: "Home",
-        watches: "Watches",   // 👈 مضافة
-        bags: "Bags",         // 👈 مضافة
+        watches: "Watches",
+        bags: "Bags",
       },
     },
   },

@@ -3,7 +3,7 @@ import Link from "next/link";
 
 const cards = [
   {
-    href: "/user/orders",
+    href: "/user/myOrder", // 👈 التعديل هون
     title: "طلباتي",
     desc: "تابعي حالة طلباتك السابقة والحالية",
     icon: "📦",

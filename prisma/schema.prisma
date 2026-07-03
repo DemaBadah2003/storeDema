@@ -53,21 +53,36 @@ model Product {
   stock         Int      @default(0)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-    orderItems    OrderItem[]   // 👈 ضيف السطر ده
 
+  orderItems    OrderItem[]   // 👈 ضيف السطر ده
 }
+
 model VerificationToken {
   id         String   @id @default(cuid())
   identifier String
   token      String   @unique
   expires    DateTime
 }
+
 // جدول الطلبات الأساسي
 model Order {
   id          String      @id @default(uuid())
   userId      String
   user        User        @relation(fields: [userId], references: [id])
-  totalAmount Decimal
+
+  // 👇 بيانات الشحن (الإضافة الجديدة)
+  fullName      String
+  phone         String
+  city          String
+  address       String
+  notes         String?
+  paymentMethod String      @default("cash")
+
+  // 👇 تفاصيل السعر (الإضافة الجديدة)
+  subtotal      Decimal
+  shipping      Decimal     @default(0)
+  totalAmount   Decimal
+
   status      String      @default("جاري التجهيز")
   createdAt   DateTime    @default(now())
   items       OrderItem[] // المنتجات الموجودة داخل هذا الطلب

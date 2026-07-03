@@ -4,6 +4,7 @@ import LanguageSwitcher from "./languge";
 import { useTranslation } from "react-i18next";
 import i18next from "../../i18n/config";
 import { useSession, signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 
 const Divider = () => (
@@ -13,6 +14,7 @@ const Divider = () => (
 export default function NavActions() {
   const { t } = useTranslation();
   const { data: session, status } = useSession();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -27,6 +29,19 @@ export default function NavActions() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // ✅ توجيه ذكي حسب الدور
+  const handleAccountManagementClick = () => {
+    if (!isLoggedIn) {
+      router.push("/signin");
+      return;
+    }
+    if (session.user.roleSlug === "admin") {
+      router.push("/admin");
+    } else {
+      router.push("/user");
+    }
+  };
 
   return (
     <div className="flex items-center gap-0">
@@ -89,17 +104,15 @@ export default function NavActions() {
 
       <Divider />
 
-      <Link
-        href="/user/orders"
+      {/* ✅ بدل الـ Link الثابت بـ button مع توجيه ذكي حسب الدور */}
+      <button
+        onClick={handleAccountManagementClick}
         className="flex flex-col justify-center hover:border hover:border-white rounded px-3 py-1 min-w-fit transition"
       >
-        <span className="text-[#8a6d5f] text-[11px] font-medium text-right">
-          {t("returns")}
-        </span>
         <span className="text-[#5c3e31] font-bold text-sm">
-          {t("orders")}
+          {t("account_management")}
         </span>
-      </Link>
+      </button>
 
     </div>
   );

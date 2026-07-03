@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const links = [
-  { href: "/user/orders", label: "طلباتي", icon: "📦" },
+  { href: "/user/myOrder", label: "طلباتي", icon: "📦" },
   { href: "/user/checkout", label: "تأكيد الطلب", icon: "🧾" },
 ];
 

@@ -14,4 +14,5 @@ export const categories: Category[] = [
   { name: "حقائب", slug: "bags", icon: "👜" },
   { name: "رياضة", slug: "sports", icon: "⚽" },
   { name: "الجمال والصحة", slug: "beauty", icon: "💄" },
+  { name: "أدوات مكتبية", slug: "office", icon: "🖊️" }, // 👈 الإضافة الجديدة
 ];
