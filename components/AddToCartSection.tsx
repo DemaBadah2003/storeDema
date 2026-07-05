@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Product } from "@/types";
 import { useCartStore } from "@/lib/store";
 
 export default function AddToCartSection({ product }: { product: Product }) {
+  const { t } = useTranslation();
   const addItem = useCartStore((state) => state.addItem);
   const [quantity, setQuantity] = useState(1);
 
@@ -18,7 +20,7 @@ export default function AddToCartSection({ product }: { product: Product }) {
     <div className="flex flex-col gap-4 mt-4">
       {/* حقل الكمية */}
       <div className="flex items-center gap-3">
-        <span className="text-[#5c3e31] font-bold">الكمية:</span>
+        <span className="text-[#5c3e31] font-bold">{t("quantity_label")}</span>
         <div className="flex items-center border border-[#b36d39] rounded-xl overflow-hidden">
           <button
             onClick={() => setQuantity((q) => Math.max(1, q - 1))}
@@ -41,7 +43,7 @@ export default function AddToCartSection({ product }: { product: Product }) {
         onClick={handleAdd}
         className="w-full bg-gradient-to-r from-[#d48c56] to-[#b36d39] hover:from-[#bd7a47] hover:to-[#9e5c2d] text-white font-bold py-3 rounded-xl shadow-md transition-all duration-300 active:scale-95"
       >
-        أضف للسلة 🛒
+        {t("add_to_cart")} 🛒
       </button>
     </div>
   );

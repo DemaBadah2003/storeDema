@@ -4,8 +4,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/lib/store";
 import { useSession } from "next-auth/react";
+import { useTranslation } from "react-i18next";
 
 export default function CartPage() {
+  const { t } = useTranslation();
   const { cart, changeQty, removeItem } = useCartStore();
   const { data: session } = useSession();
   const router = useRouter();
@@ -27,13 +29,13 @@ export default function CartPage() {
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-10" dir="rtl">
-      <h1 className="text-2xl font-bold mb-6">عربة التسوق</h1>
+      <h1 className="text-2xl font-bold mb-6">{t("cart_page_title")}</h1>
 
       {cart.length === 0 ? (
         <div className="text-center py-20">
-          <p className="mb-2">عربتك فارغة</p>
+          <p className="mb-2">{t("cart_empty_message")}</p>
           <Link href="/products" className="text-[#c8a98a] underline">
-            تصفح المنتجات
+            {t("cart_browse_products")}
           </Link>
         </div>
       ) : (
@@ -58,13 +60,15 @@ export default function CartPage() {
                 <button onClick={() => changeQty(item.product.id, -1)} className="px-2 font-bold">−</button>
                 <span>{item.quantity}</span>
                 <button onClick={() => changeQty(item.product.id, 1)} className="px-2 font-bold">+</button>
-                <button onClick={() => removeItem(item.product.id)} className="text-red-500 text-xs mr-4">حذف</button>
+                <button onClick={() => removeItem(item.product.id)} className="text-red-500 text-xs mr-4">
+                  {t("cart_remove_item")}
+                </button>
               </div>
             </div>
           ))}
 
           <div className="text-xl font-bold pt-4">
-            الإجمالي: {cartTotal.toFixed(2)}₪
+            {t("cart_total_label")} {cartTotal.toFixed(2)}₪
           </div>
 
           {/* ✅ نفس اسم الزر "تأكيد الطلب"، بس هلق بيوديكي عالـ checkout */}
@@ -72,7 +76,7 @@ export default function CartPage() {
             onClick={goToCheckout}
             className="w-full bg-gray-900 text-white py-3 rounded-lg font-bold hover:bg-gray-800 transition"
           >
-            تأكيد الطلب
+            {t("cart_checkout_btn")}
           </button>
         </div>
       )}

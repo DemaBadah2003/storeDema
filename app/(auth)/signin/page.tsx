@@ -7,9 +7,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff } from 'lucide-react';
 import { signIn, getSession } from 'next-auth/react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { getSigninSchema, SigninSchemaType } from '../forms/signin-schema';
 
 export default function Page() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -45,7 +47,7 @@ export default function Page() {
           const errorData = JSON.parse(response.error);
           setError(errorData.message);
         } catch {
-          setError('بريد إلكتروني أو كلمة مرور غير صحيحة');
+          setError(t('signin_generic_error'));
         }
         return;
       }
@@ -63,7 +65,7 @@ export default function Page() {
       router.refresh();
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.',
+        err instanceof Error ? err.message : t('signin_unexpected_error'),
       );
     } finally {
       setIsProcessing(false);
@@ -75,13 +77,13 @@ export default function Page() {
       {/* اللوغو */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
-          متجر <span style={{ color: '#D4900A' }}>ديما</span>
+          {t('store_name_prefix')} <span style={{ color: '#D4900A' }}>{t('store_name_highlight')}</span>
         </h1>
       </div>
 
       {/* بطاقة تسجيل الدخول */}
       <div className="bg-white rounded-lg border border-gray-300 p-6 w-full max-w-sm shadow-sm">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-5">تسجيل الدخول</h2>
+        <h2 className="text-2xl font-semibold text-gray-900 mb-5">{t('signin_title')}</h2>
 
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded-md text-sm mb-4">
@@ -92,11 +94,11 @@ export default function Page() {
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           {/* البريد الإلكتروني */}
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-semibold text-gray-800">البريد الإلكتروني</label>
+            <label className="text-sm font-semibold text-gray-800">{t('signin_email_label')}</label>
             <input
               type="email"
               autoComplete="email"
-              placeholder="أدخل بريدك الإلكتروني"
+              placeholder={t('signin_email_placeholder')}
               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:border-transparent transition"
               style={{ '--tw-ring-color': '#D4900A' } as React.CSSProperties}
               {...register('email')}
@@ -108,12 +110,12 @@ export default function Page() {
 
           {/* كلمة المرور */}
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-semibold text-gray-800">كلمة المرور</label>
+            <label className="text-sm font-semibold text-gray-800">{t('signin_password_label')}</label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="current-password"
-                placeholder="أدخل كلمة المرور"
+                placeholder={t('signin_password_placeholder')}
                 className="border border-gray-300 rounded-md px-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:border-transparent transition"
                 style={{ '--tw-ring-color': '#D4900A' } as React.CSSProperties}
                 {...register('password')}
@@ -122,7 +124,7 @@ export default function Page() {
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                aria-label={showPassword ? t('hide_password') : t('show_password')}
               >
                 {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
               </button>
@@ -135,7 +137,7 @@ export default function Page() {
               className="text-xs hover:underline self-start"
               style={{ color: '#D4900A' }}
             >
-              نسيت كلمة المرور؟
+              {t('signin_forgot_password')}
             </Link>
           </div>
 
@@ -152,7 +154,7 @@ export default function Page() {
               htmlFor="remember-me"
               className="text-sm text-gray-700 cursor-pointer select-none"
             >
-              تذكرني على هذا الجهاز
+              {t('signin_remember_me')}
             </label>
           </div>
 
@@ -162,20 +164,20 @@ export default function Page() {
             className="text-white font-semibold text-sm py-2 rounded-md border transition active:opacity-90 mt-1 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ backgroundColor: '#D4900A', borderColor: '#B8780A' }}
           >
-            {isProcessing ? 'جارٍ التحقق...' : 'تسجيل الدخول'}
+            {isProcessing ? t('signin_submit_loading') : t('signin_submit_btn')}
           </button>
         </form>
 
         {/* إنشاء حساب جديد */}
         <div className="border-t border-gray-200 mt-5 pt-4">
           <p className="text-sm text-gray-700">
-            ليس لديك حساب؟{' '}
+            {t('signin_no_account')}{' '}
             <Link
               href="/signup"
               className="font-medium hover:underline"
               style={{ color: '#D4900A' }}
             >
-              إنشاء حساب جديد
+              {t('signin_create_account_link')}
             </Link>
           </p>
         </div>
