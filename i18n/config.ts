@@ -7,6 +7,10 @@ i18next.use(initReactI18next).init({
   resources: {
     ar: {
       translation: {
+
+
+        "in_stock": "متوفر",
+  "out_of_stock": "غير متوفر",
         // Navbar Actions
         deliver_to: "التوصيل إلى",
         palestine: "فلسطين",
@@ -276,6 +280,10 @@ i18next.use(initReactI18next).init({
     },
     en: {
       translation: {
+
+        "in_stock": "In Stock",
+  "out_of_stock": "Out of Stock",
+
         // Navbar Actions
         deliver_to: "Deliver to",
         palestine: "Palestine",

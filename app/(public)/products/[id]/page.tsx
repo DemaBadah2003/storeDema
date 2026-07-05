@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { db as prisma } from "@/lib/db";
-import ProductDetails from "@/components/orderDetails";
+import ProductDetails from "@/components/ProductDetails";
 
 export default async function ProductDetailsPage({
   params,
