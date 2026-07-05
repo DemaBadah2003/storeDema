@@ -55,6 +55,8 @@ model Product {
   updatedAt     DateTime @updatedAt
 
   orderItems    OrderItem[]   // 👈 ضيف السطر ده
+nameEn String @default("")
+
 }
 
 model VerificationToken {

@@ -1,7 +1,8 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import i18next from "../../i18n/config"; // ← التعديل هنا
+import { useRouter } from "next/navigation"; // 👈 جديد
+import i18next from "../../i18n/config";
 
 const languages = [
   { code: "ar", label: "العربية", short: "AR", flag: "🇵🇸" },
@@ -10,6 +11,7 @@ const languages = [
 
 export default function LanguageSwitcher() {
   const { i18n, t } = useTranslation();
+  const router = useRouter(); // 👈 جديد
   const [open, setOpen] = useState(false);
   const [dropdownPos, setDropdownPos] = useState({ top: 0, right: 0 });
   const ref = useRef<HTMLDivElement>(null);
@@ -58,8 +60,12 @@ export default function LanguageSwitcher() {
             <button
               key={lang.code}
               onClick={() => {
-                i18next.changeLanguage(lang.code); // ← i18next مباشرة بدل i18n
+                i18next.changeLanguage(lang.code);
                 document.dir = lang.code === "ar" ? "rtl" : "ltr";
+                document.cookie = `lang=${lang.code}; path=/; max-age=31536000`;
+
+                router.refresh(); // 👈 هذا يفرض على Server Components إنها تشتغل من جديد
+
                 setOpen(false);
               }}
               className={`w-full text-right px-4 py-2 text-sm hover:bg-[#f5ece7] transition flex items-center gap-2

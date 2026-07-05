@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 interface Order {
   id: string;
@@ -10,6 +11,7 @@ interface Order {
   items: { product: { nameAr: string }; quantity: number; price: number }[];
 }
 
+// ⚠️ هذه القيم تبقى بالعربي لأنها Data Values تُرسل للـ backend وتُخزّن بقاعدة البيانات
 const STATUS_OPTIONS = ["جاري التجهيز", "تم الشحن", "تم التسليم", "ملغي"];
 
 // ✅ نفس منطق الألوان الدلالية المستخدم بصفحة المنتجات (traffic-light logic)
@@ -21,12 +23,23 @@ const statusColors: Record<string, string> = {
 };
 
 export default function AdminOrdersPage() {
+  const { t, i18n } = useTranslation();
+  const isRtl = i18n.language === "ar";
+
   const [orders, setOrders] = useState<Order[]>([]);
   const [searchInput, setSearchInput] = useState(""); // ما يكتبه المستخدم بالحقل
   const [search, setSearch] = useState(""); // البحث المُطبَّق فعلياً بعد الضغط على الزر
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newStatus, setNewStatus] = useState("");
+
+  // 🗺️ خريطة لترجمة نص الحالة للعرض فقط (القيمة الحقيقية تبقى عربي كما في قاعدة البيانات)
+  const statusLabels: Record<string, string> = {
+    "جاري التجهيز": t("status_preparing"),
+    "تم الشحن": t("status_shipped"),
+    "تم التسليم": t("status_delivered"),
+    "ملغي": t("status_cancelled"),
+  };
 
   useEffect(() => {
     fetch("/api/protected/users/orders")
@@ -39,7 +52,7 @@ export default function AdminOrdersPage() {
   }, []);
 
   const handleDelete = async (id: string) => {
-    if (!confirm("هل أنت متأكد من حذف الطلب؟")) return;
+    if (!confirm(t("admin_orders_confirm_delete"))) return;
 
     const res = await fetch("/api/protected/users/orders", {
       method: "DELETE",
@@ -84,21 +97,21 @@ export default function AdminOrdersPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64" dir="rtl">
-        <p className="text-[#5c3e31] font-bold">جاري تحميل الطلبات...</p>
+      <div className="flex justify-center items-center h-64" dir={isRtl ? "rtl" : "ltr"}>
+        <p className="text-[#5c3e31] font-bold">{t("admin_orders_loading")}</p>
       </div>
     );
   }
 
   return (
-    <div dir="rtl">
+    <div dir={isRtl ? "rtl" : "ltr"}>
       {/* Header - نفس تصميم صفحة المنتجات، خانة البحث على اليمين جنب العنوان */}
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-black text-[#5c3e31]">🧾 إدارة الطلبات</h1>
+          <h1 className="text-2xl font-black text-[#5c3e31]">{t("admin_orders_title")}</h1>
           <input
             type="text"
-            placeholder="🔍 ابحث برقم الطلب أو الحالة أو اسم العميل..."
+            placeholder={t("admin_orders_search_placeholder")}
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             onKeyDown={(e) => {
@@ -110,7 +123,7 @@ export default function AdminOrdersPage() {
             onClick={runSearch}
             className="bg-[#b36d39] text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-[#9a5c2e] transition"
           >
-            بحث
+            {t("admin_orders_search_btn")}
           </button>
         </div>
       </div>
@@ -118,27 +131,27 @@ export default function AdminOrdersPage() {
       {/* شريط تعديل الحالة - بنفس هوية الألوان بدل الأزرق */}
       {editingId && (
         <div className="mb-4 flex items-center gap-3 bg-[#f5e4da] p-4 rounded-xl">
-          <span className="text-sm font-bold text-[#5c3e31]">تعديل الحالة:</span>
+          <span className="text-sm font-bold text-[#5c3e31]">{t("admin_orders_edit_status_label")}</span>
           <select
             value={newStatus}
             onChange={(e) => setNewStatus(e.target.value)}
             className="border border-gray-200 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:border-[#b36d39] bg-white"
           >
             {STATUS_OPTIONS.map((s) => (
-              <option key={s} value={s}>{s}</option>
+              <option key={s} value={s}>{statusLabels[s] || s}</option>
             ))}
           </select>
           <button
             onClick={() => handleEdit(editingId)}
             className="bg-[#b36d39] text-white px-4 py-1.5 rounded-xl text-sm font-bold hover:bg-[#9a5c2e] transition"
           >
-            حفظ
+            {t("admin_orders_save_btn")}
           </button>
           <button
             onClick={() => setEditingId(null)}
             className="text-gray-500 text-sm hover:underline"
           >
-            إلغاء
+            {t("admin_orders_cancel_btn")}
           </button>
         </div>
       )}
@@ -148,11 +161,18 @@ export default function AdminOrdersPage() {
         <table className="w-full text-right">
           <thead className="bg-[#f5e4da] text-[#5c3e31]">
             <tr>
-              {["رقم الطلب", "العميل", "الحالة", "الإجمالي", "التاريخ", "إجراءات"].map((h) => (
+              {[
+                t("admin_orders_col_id"),
+                t("admin_orders_col_customer"),
+                t("admin_orders_col_status"),
+                t("admin_orders_col_total"),
+                t("admin_orders_col_date"),
+                t("admin_orders_col_actions"),
+              ].map((h, idx) => (
                 <th
-                  key={h}
+                  key={idx}
                   className={`p-4 font-black border-b border-[#e8d5c8] ${
-                    h === "إجراءات" ? "text-center" : ""
+                    h === t("admin_orders_col_actions") ? "text-center" : ""
                   }`}
                 >
                   {h}
@@ -173,7 +193,7 @@ export default function AdminOrdersPage() {
                 </td>
 
                 <td className="p-4 border-l border-gray-100 font-bold text-[#5c3e31]">
-                  {o.user?.name || o.user?.email || "غير معروف"}
+                  {o.user?.name || o.user?.email || t("admin_orders_unknown_customer")}
                 </td>
 
                 <td className="p-4 border-l border-gray-100">
@@ -182,7 +202,7 @@ export default function AdminOrdersPage() {
                       statusColors[o.status] || "bg-gray-100 text-gray-600"
                     }`}
                   >
-                    {o.status}
+                    {statusLabels[o.status] || o.status}
                   </span>
                 </td>
 
@@ -191,14 +211,14 @@ export default function AdminOrdersPage() {
                 </td>
 
                 <td className="p-4 border-l border-gray-100 text-sm text-gray-500">
-                  {new Date(o.createdAt).toLocaleDateString("ar-EG")}
+                  {new Date(o.createdAt).toLocaleDateString(isRtl ? "ar-EG" : "en-US")}
                 </td>
 
                 <td className="p-4 border-l border-gray-100">
                   <div className="flex gap-3 justify-center items-center">
                     <button
                       onClick={() => openEdit(o.id)}
-                      title="تعديل"
+                      title={t("admin_orders_edit_tooltip")}
                       className="text-blue-500 hover:text-blue-700 hover:bg-blue-50 p-2 rounded-lg transition"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -208,7 +228,7 @@ export default function AdminOrdersPage() {
 
                     <button
                       onClick={() => handleDelete(o.id)}
-                      title="حذف"
+                      title={t("admin_orders_delete_tooltip")}
                       className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -223,7 +243,7 @@ export default function AdminOrdersPage() {
         </table>
 
         {filteredOrders.length === 0 && (
-          <p className="text-center text-gray-400 py-12">لا توجد طلبات</p>
+          <p className="text-center text-gray-400 py-12">{t("admin_orders_empty")}</p>
         )}
       </div>
     </div>

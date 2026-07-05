@@ -1,21 +1,24 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
-const links = [
-  { href: "/user/myOrder", label: "طلباتي", icon: "📦" },
-  { href: "/user/checkout", label: "تأكيد الطلب", icon: "🧾" },
-];
+import { useTranslation } from "react-i18next";
 
 export default function UserLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { t, i18n } = useTranslation();
+  const isRtl = i18n.language === "ar";
+
+  const links = [
+    { href: "/user/myOrder", label: t("user_home_orders_title"), icon: "📦" },
+    { href: "/user/checkout", label: t("user_home_checkout_title"), icon: "🧾" },
+  ];
 
   return (
-    <div dir="rtl" className="flex min-h-screen bg-[#faf6f2]">
+    <div dir={isRtl ? "rtl" : "ltr"} className="flex min-h-screen bg-[#faf6f2]">
       {/* السايدبار */}
       <aside className="w-64 bg-[#5c3e31] text-white flex flex-col p-6 gap-2">
         <h2 className="text-lg font-black mb-6 flex items-center gap-2">
-          ⚙️ حسابي
+          {t("user_layout_account_title")}
         </h2>
 
         {links.map((link) => {

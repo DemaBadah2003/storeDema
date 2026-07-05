@@ -15,6 +15,7 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import { useTranslation } from "react-i18next";
 
 interface CategoryData {
   category: string;
@@ -23,7 +24,7 @@ interface CategoryData {
 }
 
 interface StockStatusData {
-  name: string;
+  name: string; // "available" | "low" | "critical"
   value: number;
 }
 
@@ -47,25 +48,27 @@ interface DashboardChartsProps {
 
 // ألوان متناسقة مع هوية المتجر
 const BROWN_PALETTE = ["#b36d39", "#a0522d", "#c98f5e", "#d9ac82", "#e8d5c8", "#5c3e31"];
+
+// 👈 ألوان حالة المخزون بمفاتيح إنجليزية (تطابق stockStatusData بعد التعديل بـ page.tsx)
 const STATUS_COLORS: Record<string, string> = {
-  "متوفر": "#22c55e",
-  "منخفض": "#eab308",
-  "نفاذ قريب": "#ef4444",
+  available: "#22c55e",
+  low: "#eab308",
+  critical: "#ef4444",
 };
 
-// 👈 دالة موحّدة للتولتيب: معاملات بنوع مرن (unknown/any) لتفادي تعارض
-// الأنواع مع Formatter<ValueType, NameType> المتوقع من recharts
-const currencyFormatter = (value: unknown): [string, string] => {
-  const num = typeof value === "number" ? value : Number(value);
-  return [`${num.toFixed(2)}₪`, "القيمة"];
-};
-
-const trendFormatter = (value: unknown, name: unknown): [string, string] => {
-  const num = typeof value === "number" ? value : Number(value);
-  if (name === "الإيرادات") {
-    return [`${num.toFixed(2)}₪`, "الإيرادات"];
-  }
-  return [`${num}`, "عدد الطلبات"];
+// 👈 يربط النص العربي المخزّن بقاعدة البيانات بمفتاح الترجمة الموجود مسبقاً بملف i18n
+const CATEGORY_KEY_MAP: Record<string, string> = {
+  "أحذية": "shoes",
+  "إلكترونيات": "electronics",
+  "الجمال والصحة": "beauty",
+  "جمال": "beauty",
+  "ملابس": "clothes",
+  "عروض اليوم": "deals",
+  "رياضة": "sports",
+  "المنزل": "home",
+  "ساعات": "watches",
+  "حقائب": "bags",
+  "أدوات مكتبية": "office",
 };
 
 export default function DashboardCharts({
@@ -74,15 +77,51 @@ export default function DashboardCharts({
   topProductsData,
   salesTrendData,
 }: DashboardChartsProps) {
+  const { t } = useTranslation();
+
+  // 👈 دالة موحّدة للتولتيب: تستخدم t() من جوا الكومبونينت
+  const currencyFormatter = (value: unknown): [string, string] => {
+    const num = typeof value === "number" ? value : Number(value);
+    return [`${num.toFixed(2)}₪`, t("tooltip_value_label")];
+  };
+
+  const revenueLegend = t("chart_revenue_legend");
+  const ordersLegend = t("chart_orders_legend");
+
+  const trendFormatter = (value: unknown, name: unknown): [string, string] => {
+    const num = typeof value === "number" ? value : Number(value);
+    if (name === revenueLegend) {
+      return [`${num.toFixed(2)}₪`, revenueLegend];
+    }
+    return [`${num}`, ordersLegend];
+  };
+
+  // 👈 نضيف حقل category مترجم لكل عنصر، مع fallback للنص الأصلي لو ما لقيناه بالـ map
+  const translatedCategoryData = categoryData.map((item) => ({
+    ...item,
+    categoryLabel: t(CATEGORY_KEY_MAP[item.category] || item.category),
+  }));
+
+  // 👈 نترجم اسم حالة المخزون للعرض بالرسمة والـ Legend
+  const stockStatusLabels: Record<string, string> = {
+    available: t("stock_status_available"),
+    low: t("stock_status_low"),
+    critical: t("stock_status_critical"),
+  };
+  const translatedStockStatusData = stockStatusData.map((item) => ({
+    ...item,
+    statusLabel: stockStatusLabels[item.name] || item.name,
+  }));
+
   return (
     <>
       {/* 📈 اتجاه المبيعات وعدد الطلبات - عرض كامل */}
       <div className="bg-white rounded-2xl p-6 shadow mt-8">
         <h2 className="text-lg font-black text-[#5c3e31] mb-4">
-          📈 اتجاه المبيعات (₪) وعدد الطلبات
+          {t("chart_sales_trend_title")}
         </h2>
         {salesTrendData.length === 0 ? (
-          <p className="text-center text-gray-400 py-12">لا توجد بيانات مبيعات كافية</p>
+          <p className="text-center text-gray-400 py-12">{t("chart_no_sales_data")}</p>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={salesTrendData}>
@@ -98,7 +137,11 @@ export default function DashboardCharts({
                 orientation="right"
                 tick={{ fill: "#5c3e31", fontSize: 12 }}
                 allowDecimals={false}
-                label={{ value: "طلبات", position: "insideRight", fill: "#5c3e31" }}
+                label={{
+                  value: t("chart_orders_axis_label"),
+                  position: "insideRight",
+                  fill: "#5c3e31",
+                }}
               />
               <Tooltip
                 contentStyle={{
@@ -113,7 +156,7 @@ export default function DashboardCharts({
                 yAxisId="revenue"
                 type="monotone"
                 dataKey="revenue"
-                name="الإيرادات"
+                name={revenueLegend}
                 stroke="#b36d39"
                 strokeWidth={3}
                 dot={{ r: 4, fill: "#b36d39" }}
@@ -123,7 +166,7 @@ export default function DashboardCharts({
                 yAxisId="count"
                 type="monotone"
                 dataKey="count"
-                name="عدد الطلبات"
+                name={ordersLegend}
                 stroke="#5c3e31"
                 strokeWidth={2}
                 strokeDasharray="5 4"
@@ -138,12 +181,12 @@ export default function DashboardCharts({
         {/* المخزون حسب الفئة */}
         <div className="bg-white rounded-2xl p-6 shadow">
           <h2 className="text-lg font-black text-[#5c3e31] mb-4">
-            📦 المخزون حسب الفئة
+            {t("chart_stock_by_category_title")}
           </h2>
           <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={categoryData}>
+            <BarChart data={translatedCategoryData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0e5dc" />
-              <XAxis dataKey="category" tick={{ fill: "#5c3e31", fontSize: 12 }} />
+              <XAxis dataKey="categoryLabel" tick={{ fill: "#5c3e31", fontSize: 12 }} />
               <YAxis tick={{ fill: "#5c3e31", fontSize: 12 }} />
               <Tooltip
                 contentStyle={{
@@ -152,7 +195,12 @@ export default function DashboardCharts({
                   fontFamily: "inherit",
                 }}
               />
-              <Bar dataKey="stock" fill="#b36d39" radius={[8, 8, 0, 0]} name="الكمية" />
+              <Bar
+                dataKey="stock"
+                fill="#b36d39"
+                radius={[8, 8, 0, 0]}
+                name={t("chart_quantity_legend")}
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -160,23 +208,23 @@ export default function DashboardCharts({
         {/* قيمة المخزون حسب الفئة */}
         <div className="bg-white rounded-2xl p-6 shadow">
           <h2 className="text-lg font-black text-[#5c3e31] mb-4">
-            💰 قيمة المخزون حسب الفئة
+            {t("chart_value_by_category_title")}
           </h2>
           <ResponsiveContainer width="100%" height={280}>
             <PieChart>
               <Pie
-                data={categoryData}
+                data={translatedCategoryData}
                 dataKey="value"
-                nameKey="category"
+                nameKey="categoryLabel"
                 cx="50%"
                 cy="50%"
                 outerRadius={95}
                 label={(props: any) => {
-                  const { category, percent } = props;
-                  return `${category} ${((percent ?? 0) * 100).toFixed(0)}%`;
+                  const { categoryLabel, percent } = props;
+                  return `${categoryLabel} ${((percent ?? 0) * 100).toFixed(0)}%`;
                 }}
               >
-                {categoryData.map((_, index) => (
+                {translatedCategoryData.map((_, index) => (
                   <Cell
                     key={`cell-${index}`}
                     fill={BROWN_PALETTE[index % BROWN_PALETTE.length]}
@@ -198,25 +246,25 @@ export default function DashboardCharts({
         {/* حالة المخزون */}
         <div className="bg-white rounded-2xl p-6 shadow">
           <h2 className="text-lg font-black text-[#5c3e31] mb-4">
-            🚦 حالة المخزون
+            {t("chart_stock_status_title")}
           </h2>
           <ResponsiveContainer width="100%" height={280}>
             <PieChart>
               <Pie
-                data={stockStatusData}
+                data={translatedStockStatusData}
                 dataKey="value"
-                nameKey="name"
+                nameKey="statusLabel"
                 cx="50%"
                 cy="50%"
                 innerRadius={55}
                 outerRadius={95}
                 paddingAngle={3}
                 label={(props: any) => {
-                  const { name, value } = props;
-                  return `${name}: ${value}`;
+                  const { statusLabel, value } = props;
+                  return `${statusLabel}: ${value}`;
                 }}
               >
-                {stockStatusData.map((entry) => (
+                {translatedStockStatusData.map((entry) => (
                   <Cell key={entry.name} fill={STATUS_COLORS[entry.name] || "#ccc"} />
                 ))}
               </Pie>
@@ -235,7 +283,7 @@ export default function DashboardCharts({
         {/* أعلى 5 منتجات من حيث قيمة المخزون */}
         <div className="bg-white rounded-2xl p-6 shadow">
           <h2 className="text-lg font-black text-[#5c3e31] mb-4">
-            🏆 أعلى 5 منتجات (قيمة المخزون)
+            {t("chart_top5_products_title")}
           </h2>
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={topProductsData} layout="vertical">
@@ -255,7 +303,12 @@ export default function DashboardCharts({
                   fontFamily: "inherit",
                 }}
               />
-              <Bar dataKey="value" fill="#a0522d" radius={[0, 8, 8, 0]} name="القيمة" />
+              <Bar
+                dataKey="value"
+                fill="#a0522d"
+                radius={[0, 8, 8, 0]}
+                name={t("tooltip_value_label")}
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>

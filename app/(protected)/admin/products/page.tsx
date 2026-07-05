@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Product } from "@/types";
 
 const emptyForm = {
@@ -7,12 +8,33 @@ const emptyForm = {
   categorySlug: "", image: "", stock: "",
 };
 
+// 👈 يربط النص العربي المخزّن بقاعدة البيانات بمفتاح الترجمة الموجود بملف i18n
+const CATEGORY_KEY_MAP: Record<string, string> = {
+  "أحذية": "shoes",
+  "الأحذية": "shoes",
+  "إلكترونيات": "electronics",
+  "الإلكترونيات": "electronics",
+  "ملابس": "clothes",
+  "الملابس": "clothes",
+  "جمال": "beauty",
+  "الجمال والصحة": "beauty",
+  "المنزل": "home",
+  "منزل": "home",
+  "ساعات": "watches",
+  "حقائب": "bags",
+  "رياضة": "sports",
+  "أدوات مكتبية": "office",
+};
+
 export default function AdminProducts() {
+  const { t, i18n } = useTranslation();
+  const isRtl = i18n.language === "ar";
+
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [searchInput, setSearchInput] = useState(""); // ما يكتبه المستخدم بالحقل
-  const [search, setSearch] = useState(""); // البحث المُطبَّق فعلياً بعد الضغط على الزر
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [form, setForm] = useState(emptyForm);
@@ -25,18 +47,17 @@ export default function AdminProducts() {
     try {
       setLoading(true);
       const res = await fetch("/api/protected/admin/products");
-      if (!res.ok) throw new Error("فشل في جلب المنتجات");
+      if (!res.ok) throw new Error(t("admin_products_fetch_error"));
       const data = await res.json();
       setProducts(data);
     } catch (error) {
-      alert("حدث خطأ أثناء جلب المنتجات");
+      alert(t("admin_products_fetch_error_alert"));
       console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
-  // 🔍 تشغيل البحث فعلياً (بدل الفلترة اللحظية مع كل حرف)
   const runSearch = () => {
     setSearch(searchInput.trim());
   };
@@ -67,32 +88,30 @@ export default function AdminProducts() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("هل أنت متأكد من حذف المنتج؟")) return;
+    if (!confirm(t("admin_products_delete_confirm"))) return;
 
     try {
-      // 👈 الحذف عبر query string حسب route.ts في app/api/protected/admin/products/route.ts
       const res = await fetch(`/api/protected/admin/products?id=${id}`, {
         method: "DELETE",
       });
-      if (!res.ok) throw new Error("فشل الحذف");
+      if (!res.ok) throw new Error("Delete failed");
 
       setProducts((prev) => prev.filter((p) => p.id !== id));
     } catch (error) {
-      alert("حدث خطأ أثناء حذف المنتج");
+      alert(t("admin_products_delete_error"));
       console.error(error);
     }
   };
 
   const handleSave = async () => {
     if (!form.nameAr || !form.price) {
-      alert("يرجى تعبئة جميع الحقول المطلوبة");
+      alert(t("admin_products_fill_required"));
       return;
     }
 
     setSaving(true);
     try {
       if (editingProduct) {
-        // 👈 تعديل منتج موجود عبر app/api/protected/admin/products/[id]/route.ts (PUT)
         const res = await fetch(
           `/api/protected/admin/products/${editingProduct.id}`,
           {
@@ -101,50 +120,68 @@ export default function AdminProducts() {
             body: JSON.stringify(form),
           }
         );
-        if (!res.ok) throw new Error("فشل التعديل");
+        if (!res.ok) throw new Error("Update failed");
 
         const updated = await res.json();
         setProducts((prev) =>
           prev.map((p) => (p.id === editingProduct.id ? updated : p))
         );
       } else {
-        // 👈 إضافة منتج جديد عبر app/api/protected/admin/products/[id]/route.ts (POST)
         const res = await fetch(`/api/protected/admin/products/new`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(form),
         });
-        if (!res.ok) throw new Error("فشل الإضافة");
+        if (!res.ok) throw new Error("Create failed");
 
         const created = await res.json();
         setProducts((prev) => [created, ...prev]);
       }
       setShowModal(false);
     } catch (error) {
-      alert("حدث خطأ أثناء حفظ المنتج");
+      alert(t("admin_products_save_error"));
       console.error(error);
     } finally {
       setSaving(false);
     }
   };
 
+  const tableHeaders = [
+    { key: "image", label: t("admin_products_table_image") },
+    { key: "name", label: t("admin_products_table_name") },
+    { key: "category", label: t("admin_products_table_category") },
+    { key: "price", label: t("admin_products_table_price") },
+    { key: "stock", label: t("admin_products_table_stock") },
+    { key: "actions", label: t("admin_products_table_actions") },
+  ];
+
+  const formFields = [
+    { key: "nameAr", label: t("admin_products_field_nameAr"), placeholder: t("admin_products_field_nameAr_placeholder") },
+    { key: "name", label: t("admin_products_field_name"), placeholder: t("admin_products_field_name_placeholder") },
+    { key: "price", label: t("admin_products_field_price"), placeholder: t("admin_products_field_price_placeholder") },
+    { key: "category", label: t("admin_products_field_category"), placeholder: t("admin_products_field_category_placeholder") },
+    { key: "categorySlug", label: t("admin_products_field_categorySlug"), placeholder: t("admin_products_field_categorySlug_placeholder") },
+    { key: "image", label: t("admin_products_field_image"), placeholder: t("admin_products_field_image_placeholder") },
+    { key: "stock", label: t("admin_products_field_stock"), placeholder: t("admin_products_field_stock_placeholder") },
+  ];
+
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64" dir="rtl">
-        <p className="text-[#5c3e31] font-bold">جاري تحميل المنتجات...</p>
+      <div className="flex justify-center items-center h-64" dir={isRtl ? "rtl" : "ltr"}>
+        <p className="text-[#5c3e31] font-bold">{t("admin_products_loading")}</p>
       </div>
     );
   }
 
   return (
-    <div dir="rtl">
+    <div dir={isRtl ? "rtl" : "ltr"}>
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-black text-[#5c3e31]">📦 إدارة المنتجات</h1>
+          <h1 className="text-2xl font-black text-[#5c3e31]">{t("admin_products_title")}</h1>
           <input
             type="text"
-            placeholder="🔍 ابحث باسم المنتج أو الفئة..."
+            placeholder={t("admin_products_search_placeholder")}
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             onKeyDown={(e) => {
@@ -156,30 +193,30 @@ export default function AdminProducts() {
             onClick={runSearch}
             className="bg-[#b36d39] text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-[#9a5c2e] transition"
           >
-            بحث
+            {t("admin_products_search_btn")}
           </button>
         </div>
         <button
           onClick={openAdd}
           className="bg-[#b36d39] text-white px-5 py-2 rounded-xl font-bold hover:bg-[#9a5c2e] transition flex items-center gap-2 whitespace-nowrap"
         >
-          <span className="text-xl">+</span> إضافة منتج
+          <span className="text-xl">+</span> {t("admin_products_add_btn")}
         </button>
       </div>
 
       {/* Table */}
       <div className="bg-white rounded-2xl shadow overflow-hidden">
-        <table className="w-full text-right">
+        <table className={`w-full ${isRtl ? "text-right" : "text-left"}`}>
           <thead className="bg-[#f5e4da] text-[#5c3e31]">
             <tr>
-              {["الصورة", "الاسم", "الفئة", "السعر", "المخزون", "إجراءات"].map((h) => (
+              {tableHeaders.map((h) => (
                 <th
-                  key={h}
+                  key={h.key}
                   className={`p-4 font-black border-b border-[#e8d5c8] ${
-                    h === "إجراءات" ? "text-center" : ""
+                    h.key === "actions" ? "text-center" : ""
                   }`}
                 >
-                  {h}
+                  {h.label}
                 </th>
               ))}
             </tr>
@@ -192,7 +229,7 @@ export default function AdminProducts() {
                   index % 2 === 0 ? "bg-white" : "bg-[#fdfaf8]"
                 }`}
               >
-                <td className="p-4 border-l border-gray-100">
+                <td className={`p-4 ${isRtl ? "border-l" : "border-r"} border-gray-100`}>
                   <img
                     src={p.image}
                     alt={p.nameAr}
@@ -200,21 +237,21 @@ export default function AdminProducts() {
                   />
                 </td>
 
-                <td className="p-4 border-l border-gray-100 font-bold text-[#5c3e31]">
-                  {p.nameAr}
+                <td className={`p-4 ${isRtl ? "border-l" : "border-r"} border-gray-100 font-bold text-[#5c3e31]`}>
+                  {isRtl ? p.nameAr : p.name}
                 </td>
 
-                <td className="p-4 border-l border-gray-100">
+                <td className={`p-4 ${isRtl ? "border-l" : "border-r"} border-gray-100`}>
                   <span className="bg-[#f5e4da] text-[#b36d39] px-3 py-1 rounded-full text-xs font-bold">
-                    {p.category}
+                    {t(CATEGORY_KEY_MAP[p.category] || p.category)}
                   </span>
                 </td>
 
-                <td className="p-4 border-l border-gray-100 font-black text-[#a0522d]">
+                <td className={`p-4 ${isRtl ? "border-l" : "border-r"} border-gray-100 font-black text-[#a0522d]`}>
                   {p.price}₪
                 </td>
 
-                <td className="p-4 border-l border-gray-100">
+                <td className={`p-4 ${isRtl ? "border-l" : "border-r"} border-gray-100`}>
                   <span className={`px-3 py-1 rounded-full text-sm font-bold ${
                     p.stock > 20
                       ? "bg-green-100 text-green-700"
@@ -226,11 +263,11 @@ export default function AdminProducts() {
                   </span>
                 </td>
 
-                <td className="p-4 border-l border-gray-100">
+                <td className={`p-4 ${isRtl ? "border-l" : "border-r"} border-gray-100`}>
                   <div className="flex gap-3 justify-center items-center">
                     <button
                       onClick={() => openEdit(p)}
-                      title="تعديل"
+                      title={t("admin_products_edit_tooltip")}
                       className="text-blue-500 hover:text-blue-700 hover:bg-blue-50 p-2 rounded-lg transition"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -240,7 +277,7 @@ export default function AdminProducts() {
 
                     <button
                       onClick={() => handleDelete(p.id)}
-                      title="حذف"
+                      title={t("admin_products_delete_tooltip")}
                       className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -255,7 +292,7 @@ export default function AdminProducts() {
         </table>
 
         {filtered.length === 0 && (
-          <p className="text-center text-gray-400 py-12">لا توجد نتائج</p>
+          <p className="text-center text-gray-400 py-12">{t("admin_products_no_results")}</p>
         )}
       </div>
 
@@ -265,7 +302,9 @@ export default function AdminProducts() {
           <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-black text-[#5c3e31]">
-                {editingProduct ? "✏️ تعديل المنتج" : "➕ إضافة منتج جديد"}
+                {editingProduct
+                  ? t("admin_products_modal_edit_title")
+                  : t("admin_products_modal_add_title")}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
@@ -286,15 +325,7 @@ export default function AdminProducts() {
                 </div>
               )}
 
-              {[
-                { key: "nameAr", label: "اسم المنتج (عربي)", placeholder: "مثال: دفتر ملاحظات" },
-                { key: "name", label: "اسم المنتج (إنجليزي)", placeholder: "مثال: Notebook" },
-                { key: "price", label: "السعر ₪", placeholder: "مثال: 9.99" },
-                { key: "category", label: "الفئة", placeholder: "مثال: أدوات مكتبية" },
-                { key: "categorySlug", label: "Slug الفئة", placeholder: "مثال: office" },
-                { key: "image", label: "مسار الصورة", placeholder: "مثال: /notebook.jpg" },
-                { key: "stock", label: "الكمية المتوفرة", placeholder: "مثال: 50" },
-              ].map((field) => (
+              {formFields.map((field) => (
                 <div key={field.key}>
                   <label className="text-[#5c3e31] font-bold block mb-1 text-sm">
                     {field.label}
@@ -316,17 +347,17 @@ export default function AdminProducts() {
                   className="flex-1 bg-[#b36d39] text-white font-bold py-3 rounded-xl hover:bg-[#9a5c2e] transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {saving
-                    ? "جاري الحفظ..."
+                    ? t("admin_products_saving_btn")
                     : editingProduct
-                    ? "حفظ التعديلات"
-                    : "إضافة المنتج"}
+                    ? t("admin_products_save_btn")
+                    : t("admin_products_add_submit_btn")}
                 </button>
                 <button
                   onClick={() => setShowModal(false)}
                   disabled={saving}
                   className="flex-1 border border-gray-200 text-gray-500 font-bold py-3 rounded-xl hover:bg-gray-50 transition"
                 >
-                  إلغاء
+                  {t("admin_products_cancel_btn")}
                 </button>
               </div>
             </div>

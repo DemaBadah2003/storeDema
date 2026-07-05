@@ -7,7 +7,7 @@ type OrderItem = {
   id: string;
   quantity: number;
   price: number;
-  product: { nameAr: string; image: string };
+  product: { nameAr: string; name: string; nameEn: string; image: string };
 };
 
 type OrderDetails = {
@@ -157,11 +157,13 @@ export default function OrderDetailsPage() {
               <div key={item.id} className="flex items-center gap-3">
                 <img
                   src={item.product.image}
-                  alt={item.product.nameAr}
+                  alt={isRtl ? item.product.nameAr : item.product.nameEn}
                   className="w-14 h-14 object-contain rounded-lg bg-[#f5e4da] p-1"
                 />
                 <div className="flex-1">
-                  <p className="text-sm font-bold text-[#5c3e31]">{item.product.nameAr}</p>
+                  <p className="text-sm font-bold text-[#5c3e31]">
+                    {isRtl ? item.product.nameAr : item.product.nameEn}
+                  </p>
                   <p className="text-xs text-gray-400">{t("quantity_label")} {item.quantity}</p>
                 </div>
                 <p className="text-sm font-black text-[#a0522d]">
